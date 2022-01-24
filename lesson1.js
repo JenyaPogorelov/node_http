@@ -7,8 +7,8 @@ const port = 8000;
 const requestListener = (req, res) => {
     if (req.url === '/get' && req.method === 'GET') {
         try {
-            let files = fs.readdirSync('files');
-            res.writeHead(200);
+            let files = fs.readdirSync('files', 'utf8');
+            res.writeHead(200, {'Content-Type': 'text/plain; charset=utf-8'});
             res.end(files.join(', '));
         } catch (err) {
             res.writeHead(500);
