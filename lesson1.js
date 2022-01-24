@@ -1,11 +1,17 @@
 const http = require("http");
+const fs = require('fs');
 
 const host = 'localhost';
 const port = 8000;
 
 const requestListener = (req, res) => {
-    res.writeHead(200);
-    res.end("Hello! It's my first server");
+    if (req.url === '/get' && req.method === 'GET') {
+        res.writeHead(200);
+        res.end('success');
+    } else {
+        res.writeHead(404);
+        res.end('we don\'t know');
+    }
 };
 
 const server = http.createServer(requestListener);
