@@ -22,6 +22,12 @@ const requestListener = (req, res) => {
             res.writeHead(500);
             res.end('Internal server error');
         }
+    } else if (req.url === '/post' && req.method === 'POST') {
+        res.writeHead(200);
+        res.end('success');
+    } else if (req.url === '/delete' && req.method === 'DELETE') {
+        res.writeHead(200);
+        res.end('success');
     }
 };
 
