@@ -4,6 +4,12 @@ const fs = require('fs');
 const host = 'localhost';
 const port = 8000;
 
+const user = {
+  id: 123,
+  username: testuser,
+  password: qwerty,
+};
+
 const requestListener = (req, res) => {
 
 };
