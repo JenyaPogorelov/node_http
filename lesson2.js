@@ -5,9 +5,9 @@ const host = 'localhost';
 const port = 8000;
 
 const user = {
-  id: 123,
-  username: 'testuser',
-  password: 'qwerty',
+    id: 123,
+    username: 'testuser',
+    password: 'qwerty',
 };
 
 const requestListener = (req, res) => {
@@ -17,9 +17,16 @@ const requestListener = (req, res) => {
             data += chunk;
         });
         req.on('end', () => {
-            let auth = JSON.parse(data)
-            console.log(auth);
-            if ( user.username === auth.username && user.password === auth.password) {
+            const auth = JSON.parse(data);
+            const expiresDate = Date.now();
+            const timezone = 60 * 60 * (new Date().getTimezoneOffset() / -60);
+            const timeToLiveCookie = 60 * 60 * 24 * 2;
+
+            if (user.username === auth.username && user.password === auth.password) {
+                const isAuth = `true, Expires=${(new Date(expiresDate + (1000 * timeToLiveCookie) + (1000 * timezone))).toUTCString()}; max_age=${timeToLiveCookie}; domain=localhost; path=/;`;
+                8
+                const userID = `${user.id}, Expires=${(new Date(expiresDate + (1000 * timeToLiveCookie) + (1000 * 60 * 60 * 3))).toUTCString()}; max_age=${timeToLiveCookie}; domain=localhost; path=/;`;
+                res.setHeader('Set-Cookie', [`userId=${userID}`, `authorized=${isAuth}`])
                 res.writeHead(200);
                 res.end(`Добро пожаловать`);
             }
