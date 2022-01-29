@@ -25,7 +25,7 @@ const requestListener = (req, res) => {
             if (user.username === auth.username && user.password === auth.password) {
                 const isAuth = `true, Expires=${(new Date(expiresDate + (1000 * timeToLiveCookie) + (1000 * timezone))).toUTCString()}; max_age=${timeToLiveCookie}; domain=localhost; path=/;`;
                 8
-                const userID = `${user.id}, Expires=${(new Date(expiresDate + (1000 * timeToLiveCookie) + (1000 * 60 * 60 * 3))).toUTCString()}; max_age=${timeToLiveCookie}; domain=localhost; path=/;`;
+                const userID = `${user.id}, Expires=${(new Date(expiresDate + (1000 * timeToLiveCookie) + (1000 * timezone))).toUTCString()}; max_age=${timeToLiveCookie}; domain=localhost; path=/;`;
                 res.setHeader('Set-Cookie', [`userId=${userID}`, `authorized=${isAuth}`])
                 res.writeHead(200);
                 res.end(`Добро пожаловать, Вы авторизованы`);
