@@ -14,13 +14,16 @@ const requestListener = (req, res) => {
     if (req.url === "/auth" && req.method === 'POST') {
         let data = '';
         req.on('data', chunk => {
-            // console.log(chunk);
             data += chunk;
         });
         req.on('end', () => {
-            console.log(JSON.parse(data));
-            res.writeHead(200);
-            res.end(`${JSON.parse(data)}`);
+            let auth = JSON.parse(data)
+            console.log(auth);
+            if ( user.username === auth.username && user.password === auth.password) {
+                res.writeHead(200);
+                res.end(`Добро пожаловать`);
+            }
+
         })
 
 
