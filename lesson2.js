@@ -1,5 +1,6 @@
 const http = require("http");
 const fs = require('fs');
+const path = require('path');
 
 const host = 'localhost';
 const port = 8000;
@@ -30,7 +31,7 @@ const requestListener = (req, res) => {
                 const isAuth = `true; Expires=${(new Date(expiresDate + (1000 * timeToLiveCookie) + (1000 * timezone))).toUTCString()}; Max-Age=${timeToLiveCookie}; domain=localhost; path=/;`;
                 8
                 const userID = `${user.id}; Expires=${(new Date(expiresDate + (1000 * timeToLiveCookie) + (1000 * timezone))).toUTCString()}; Max-Age=${timeToLiveCookie}; domain=localhost; path=/;`;
-                res.setHeader('Set-Cookie', [`userId=${userID}`, `authorized=${isAuth}`])
+                res.setHeader('Set-Cookie', [`userID=${userID}`, `authorized=${isAuth}`])
                 res.writeHead(200);
                 res.end(`Добро пожаловать, Вы авторизованы`);
             } else {
@@ -40,19 +41,50 @@ const requestListener = (req, res) => {
         })
     } else if (req.url === '/post' && req.method === 'POST') {
         const cookie = req.headers.cookie;
-        console.log(cookie)
-        let data = '';
-        req.on('data', chunk => {
-            data += chunk;
-        });
-        req.on('end', () => {
-            const parsedData = JSON.parse(data);
-            console.log(cookieToObject(cookie));
-        });
+        const cookieParse = cookieToObject(cookie);
+        // Тут я решил ID привести к строке чем к числу, т.к. ID не всегда числовой, а строка я думаю будет универсальней
+        if (user.id.toString() === cookieParse.userID) {
+            console.log(cookie, 'cookie')
+            console.log(cookieParse, 'cookieParse')
+            let data = '';
+            req.on('data', chunk => {
+                data += chunk;
+            });
+            req.on('end', () => {
+                const parsedData = JSON.parse(data);
+                try {
+                    const dir = path.join(__dirname, 'files');
+                    fs.stat(dir, function (err, stats) {
+                        if (err) {
+                            fs.mkdirSync(dir);
+                        }
+                        fs.writeFile(
+                            path.join(dir, `${parsedData.filename}`),
+                            parsedData.content + '\n',
+                            {
+                                encoding: "utf8",
+                                flag: "a"
+                            },
+                            (err) => {
+                                if (err) throw err;
+                                console.log('The file has been saved!');
+                            }
+                        );
+                    });
+                } catch (err) {
+                    res.writeHead(500);
+                    res.end('Internal server error');
+                }
+
+            });
 
 
-        res.writeHead(200);
-        res.end(`${cookie},,,, ${cookie.indexOf('userId')}`);
+            res.writeHead(200);
+            res.end(`${cookie},,,, ${cookie.indexOf('userID')}`);
+        } else {
+            res.writeHead(401);
+            res.end(`Вы не авторизованы`);
+        }
     }
 };
 
@@ -61,3 +93,9 @@ const server = http.createServer(requestListener);
 server.listen(port, host, () => {
     console.log(`Server is running on http://${host}:${port}`);
 });
+
+
+// {
+//     "username": "testuser",
+//     "password": "qwerty"
+// }
