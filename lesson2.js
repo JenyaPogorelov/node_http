@@ -1,5 +1,5 @@
 const http = require("http");
-const fs = require('fs');
+const {stat, writeFile, unlink, mkdirSync} = require('fs')
 const path = require('path');
 
 const host = 'localhost';
@@ -29,7 +29,6 @@ const requestListener = (req, res) => {
 
             if (user.username === auth.username && user.password === auth.password) {
                 const isAuth = `true; Expires=${(new Date(expiresDate + (1000 * timeToLiveCookie) + (1000 * timezone))).toUTCString()}; Max-Age=${timeToLiveCookie}; domain=localhost; path=/;`;
-                // 8
                 const userID = `${user.id}; Expires=${(new Date(expiresDate + (1000 * timeToLiveCookie) + (1000 * timezone))).toUTCString()}; Max-Age=${timeToLiveCookie}; domain=localhost; path=/;`;
                 res.setHeader('Set-Cookie', [`userID=${userID}`, `authorized=${isAuth}`])
                 res.writeHead(200);
@@ -54,11 +53,11 @@ const requestListener = (req, res) => {
                 const parsedData = JSON.parse(data);
                 try {
                     const dir = path.join(__dirname, 'files');
-                    fs.stat(dir, function (err, stats) {
+                    stat(dir, function (err, stats) {
                         if (err) {
-                            fs.mkdirSync(dir);
+                            mkdirSync(dir);
                         }
-                        fs.writeFile(
+                        writeFile(
                             path.join(dir, `${parsedData.filename}`),
                             parsedData.content + '\n',
                             {
@@ -95,13 +94,13 @@ const requestListener = (req, res) => {
                 const parsedData = JSON.parse(data);
                 try {
                     const dir = path.join(__dirname, 'files', `${parsedData.filename}`);
-                    fs.stat(dir, function (err, stats) {
+                    stat(dir, function (err, stats) {
                         if (err) {
                             res.writeHead(404);
                             res.end('Файл или дирректория не найдены, или уже были удалены ранее');
                             return
                         } else {
-                            fs.unlink(dir, (err) => {
+                            unlink(dir, (err) => {
                                 if (err) throw err;
                                 console.log(`файл ${parsedData.filename}  был успешно удален`);
                             });
@@ -136,4 +135,9 @@ server.listen(port, host, () => {
 // {
 //     "username": "testuser",
 //     "password": "qwerty"
+// }
+
+// {
+//     "filename": "file1",
+//     "content": "Некоторый text в file1"
 // }
